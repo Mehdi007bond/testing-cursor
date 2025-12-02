@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial IoT Digital Twin Dashboard - Steel Wire Manufacturing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+
+        #container {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: auto 1fr;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            background: linear-gradient(90deg, #0f3460 0%, #16213e 100%);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #00d9ff;
+            font-size: 24px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        #left-panel, #right-panel {
+            background: rgba(15, 52, 96, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        #left-panel {
+            grid-column: 1;
+        }
+
+        #right-panel {
+            grid-column: 3;
+        }
+
+        #canvas-container {
+            grid-column: 2;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #0a0a15;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+
+        .panel-section {
+            background: rgba(30, 30, 50, 0.6);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .section-title {
+            color: #00d9ff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-btn {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #00c853 0%, #00a844 100%);
+            color: white;
+        }
+
+        .btn-start:hover {
+            box-shadow: 0 0 15px rgba(0, 200, 83, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+            color: white;
+        }
+
+        .btn-stop:hover {
+            box-shadow: 0 0 15px rgba(255, 82, 82, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+            color: white;
+        }
+
+        .btn-reset:hover {
+            box-shadow: 0 0 15px rgba(255, 167, 38, 0.5);
+            transform: translateY(-2px);
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 5px;
+            color: #e0e0e0;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .line-status {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(20, 20, 35, 0.8);
+            border-radius: 5px;
+            border-left: 4px solid #00d9ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .line-status:hover {
+            background: rgba(30, 30, 45, 0.9);
+            transform: translateX(5px);
+        }
+
+        .line-status.selected {
+            background: rgba(0, 217, 255, 0.2);
+            border-left-color: #00ff88;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .status-operational { background: #00c853; color: #00c853; }
+        .status-warning { background: #ffa726; color: #ffa726; }
+        .status-error { background: #ff5252; color: #ff5252; }
+        .status-idle { background: #666; color: #666; }
+
+        .sensor-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .sensor-item {
+            background: rgba(20, 20, 35, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 217, 255, 0.1);
+        }
+
+        .sensor-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .sensor-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00d9ff;
+        }
+
+        .sensor-unit {
+            font-size: 12px;
+            color: #666;
+            margin-left: 3px;
+        }
+
+        #vibration-chart {
+            width: 100%;
+            height: 150px;
+            background: rgba(20, 20, 35, 0.8);
+            border-radius: 5px;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .alert-item {
+            background: rgba(255, 82, 82, 0.1);
+            border-left: 3px solid #ff5252;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .alert-time {
+            color: #888;
+            font-size: 10px;
+        }
+
+        .checkbox-control {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .checkbox-control input {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-control label {
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 30, 50, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 217, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 217, 255, 0.5);
+        }
+
+        .metric-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            font-size: 12px;
+        }
+
+        .metric-label {
+            color: #888;
+        }
+
+        .metric-value {
+            color: #00d9ff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <header>
+            <h1>🏭 FerProcess 12m 8-Lines Steel Wire Manufacturing</h1>
+            <div class="subtitle">Industrial IoT Digital Twin Dashboard - Predictive Maintenance System</div>
+        </header>
+
+        <div id="left-panel">
+            <div class="panel-section">
+                <div class="section-title">⚙️ Simulation Controls</div>
+                <button class="control-btn btn-start" onclick="startSimulation()">▶ Start Simulation</button>
+                <button class="control-btn btn-stop" onclick="stopSimulation()">⏸ Stop Simulation</button>
+                <button class="control-btn btn-reset" onclick="resetSimulation()">🔄 Reset System</button>
+                <div class="checkbox-control">
+                    <input type="checkbox" id="auto-cycle" onchange="toggleAutoCycle(this.checked)">
+                    <label for="auto-cycle">Auto-Cycle Lines</label>
+                </div>
+                <div class="checkbox-control">
+                    <input type="checkbox" id="hangar-lights" checked onchange="toggleHangarLights(this.checked)">
+                    <label for="hangar-lights">Hangar Lights</label>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="section-title">🎯 Machine Selector</div>
+                <select id="machine-selector" onchange="selectMachine(this.value)">
+                    <option value="overview">Factory Overview</option>
+                    <option value="line1">Line 1 - 5.5mm Diameter</option>
+                    <option value="line2">Line 2 - 6.0mm Diameter</option>
+                    <option value="line3">Line 3 - 6.5mm Diameter</option>
+                    <option value="line4">Line 4 - 7.0mm Diameter</option>
+                    <option value="line5">Line 5 - 7.5mm Diameter</option>
+                    <option value="line6">Line 6 - 8.0mm Diameter</option>
+                    <option value="line7">Line 7 - 9.0mm Diameter</option>
+                    <option value="line8">Line 8 - 10.0mm Diameter</option>
+                </select>
+            </div>
+
+            <div class="panel-section">
+                <div class="section-title">📊 Factory Floor Live Status</div>
+                <div id="lines-status-container"></div>
+            </div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="three-canvas"></canvas>
+        </div>
+
+        <div id="right-panel">
+            <div class="panel-section">
+                <div class="section-title">📡 Live Sensor Feed</div>
+                <div id="selected-line-info">
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        Select a line to view sensor data
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="section-title">📈 Vibration Analysis</div>
+                <canvas id="vibration-chart"></canvas>
+            </div>
+
+            <div class="panel-section">
+                <div class="section-title">⚠️ Active Alerts</div>
+                <div id="alerts-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="libs/three.min.js"></script>
+    <script src="libs/OrbitControls.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
