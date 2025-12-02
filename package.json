@@ -1,12 +1,22 @@
 {
   "name": "industrial-iot-dashboard",
-  "version": "1.0.0",
-  "description": "Industrial IoT Digital Twin Dashboard for Steel Wire Manufacturing",
-  "main": "app.js",
+  "version": "2.0.0",
+  "description": "3D Digital Twin - Steel Wire Straightening & Cutting System",
+  "type": "module",
+  "main": "dist/main.js",
   "scripts": {
-    "start": "python3 -m http.server 8080"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "start": "npm run dev"
   },
   "dependencies": {
-    "three": "^0.128.0"
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.160.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10"
   }
 }
