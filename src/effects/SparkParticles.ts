@@ -7,7 +7,7 @@ import * as THREE from 'three';
 
 export class SparkParticles {
     private group: THREE.Group;
-    private particles: THREE.Points;
+    private particles!: THREE.Points;  // Use definite assignment assertion
     private particleSystem: {
         position: THREE.Vector3;
         velocity: THREE.Vector3;

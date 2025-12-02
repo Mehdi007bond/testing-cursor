@@ -81,7 +81,7 @@ export class Lighting {
     /**
      * Update lighting (for dynamic effects)
      */
-    public update(deltaTime: number): void {
+    public update(_deltaTime: number): void {
         // Could add flickering or dynamic lighting effects here
     }
 

@@ -15,7 +15,6 @@ export class CuttingSystem {
     private blade: THREE.Mesh | null = null;
     private disc: THREE.Mesh | null = null;
     private arm: THREE.Mesh | null = null;
-    private armRotation: number = 0;
     private cutting: boolean = false;
     private cutTime: number = 0;
     
@@ -127,7 +126,6 @@ export class CuttingSystem {
     public triggerCut(): void {
         if (!this.cutting) {
             this.cutting = true;
-            this.armRotation = 0;
             this.cutTime = 0;
         }
     }

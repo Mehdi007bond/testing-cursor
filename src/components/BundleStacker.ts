@@ -144,7 +144,6 @@ export class BundleStacker {
     }
 
     private createBundleStraps(): void {
-        const numStraps = 3;
         const strapPositions = [-this.barLength * 0.3, 0, this.barLength * 0.3];
         
         strapPositions.forEach(xPos => {
