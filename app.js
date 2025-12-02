@@ -162,7 +162,7 @@ function createProductionLines() {
             vibration: 0,
             speed: 0,
             cutLength: 12.0,
-            weight: 0,
+            weight: Math.random() * 300 + 700, // Initial weight: 700-1000 kg
             barCount: 0,
             accumLength: 0,
             cycleTime: 0,
